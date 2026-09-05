@@ -115,7 +115,62 @@
     .champ{background:#eee;color:#000}
     .view{display:block!important}
   }
+
+  /* ===== live mode banner ===== */
+  #modebar{display:none;background:#12331f;color:#cdeadb;font-size:12px;font-weight:600;padding:8px 14px;text-align:center;border-bottom:1px solid #1f5a38}
+  #modebar .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  #modebar .dot.admin{background:#e0a24b}
+  #modebar .dot.live{background:#4be08f;box-shadow:0 0 0 0 #4be08f;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(75,224,143,.6)}70%{box-shadow:0 0 0 8px rgba(75,224,143,0)}100%{box-shadow:0 0 0 0 rgba(75,224,143,0)}}
+  #modebar button{margin-left:8px;background:transparent;border:1px solid currentColor;color:inherit;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:700}
+  /* viewers: lock all editing */
+  body.viewer input,body.viewer select,body.viewer .step button{pointer-events:none;opacity:.85}
+  body.viewer .btn.green,body.viewer #v-setup .card:nth-of-type(1),
+  body.viewer .savebar,body.viewer #tb-list .mv,body.viewer .swatches{opacity:.4;pointer-events:none}
+  body.viewer .game .sc,body.viewer .po .sc{background:var(--navy2)}
+  body.viewer .viewer-hide{display:none!important}
 </style>
+
+<!-- Firebase live sync configured -->
+<script>
+  // >>> PASTE YOUR FIREBASE CONFIG VALUES HERE <<<
+  const firebaseConfig = {
+    apiKey: "AIzaSyDr7Z5ZUKl_h5I4VRetuJLvjpLj-HvgCUA",
+    authDomain: "pickle-ball-9a7f1.firebaseapp.com",
+    databaseURL: "https://pickle-ball-9a7f1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "pickle-ball-9a7f1",
+    storageBucket: "pickle-ball-9a7f1.firebasestorage.app",
+    messagingSenderId: "492838582207",
+    appId: "1:492838582207:web:bce377687a2320688c130a"
+  };
+  // >>> CHOOSE YOUR SECRET ADMIN CODE (only you know it) <<<
+  const ADMIN_CODE = "eskay2026";
+  // Which tournament "room" to sync (change to run separate events)
+  const ROOM_ID = "live";
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  let _db=null, _connected=false;
+  try{
+    if(firebaseConfig.apiKey && firebaseConfig.apiKey!=="PASTE_API_KEY"){
+      const app=initializeApp(firebaseConfig);
+      _db=getDatabase(app);
+      _connected=true;
+    }
+  }catch(e){ console.warn("Firebase init failed",e); }
+  const dref=()=> ref(_db, "tournaments/"+ROOM_ID);
+  // expose bridge for the main script
+  window.CLOUD={
+    connected:()=>_connected,
+    // push state to cloud (admin only)
+    push:(state)=>{ if(_db){ try{ set(dref(), state); }catch(e){console.warn(e);} } },
+    // subscribe to cloud changes
+    subscribe:(cb)=>{ if(_db){ onValue(dref(),(snap)=>{ cb(snap.val()); }); } }
+  };
+  window.dispatchEvent(new Event("cloud-ready"));
+</script>
+
 </head>
 <body>
 <header>
@@ -272,6 +327,10 @@
 
 <script>
 const LS_KEY='eskay_tournament_v2';
+let IS_ADMIN=false;        // becomes true when correct code entered / stored
+let CLOUD_READY=false;
+// admin flag persists locally so you don't re-enter the code each time on YOUR phone
+try{ IS_ADMIN = localStorage.getItem('eskay_is_admin')==='1'; }catch(e){}
 let S = blank();
 function blank(){return { config:null, teams:[], games:[], playoffs:[], filter:'all',
   title:'Eskay Pickleball Tournament', subtitle:'29 August 2026 · Eskay Club',
@@ -283,7 +342,13 @@ const ACCENTS=['#c8a24b','#e0654e','#4e8fe0','#66b46a','#a678d8','#e08fb4'];
 const $ = s=>document.querySelector(s);
 const el = (t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1600);}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}}
+function save(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){}
+  // live sync: only admin pushes to cloud
+  if(window.CLOUD && window.CLOUD.connected() && IS_ADMIN){
+    try{ window.CLOUD.push({state:S, ts:Date.now()}); }catch(e){}
+  }
+}
 function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 
 function stepN(k,d){const map={teams:'#i-teams',pools:'#i-pools',courts:'#i-courts',points:'#i-points',ppoints:'#i-ppoints',adv:'#i-adv',dur:'#i-dur'};const i=$(map[k]);i.value=Math.max(+i.min,Math.min(+i.max,(+i.value||0)+d));clampAll();}
@@ -639,9 +704,52 @@ function loadSetupInputs(){
   onFormat();clampAll();
 }
 
+function currentView(){const a=document.querySelector('.view.active');return a?a.id.replace('v-',''):'setup';}
+function rerender(){const v=currentView();if(v==='schedule')renderSchedule();else if(v==='standings')renderStandings();else if(v==='playoffs')renderPlayoffs();else if(v==='teams')renderRoster();else if(v==='print')renderPrint();}
+
+function applyMode(){
+  // Banner
+  let bar=document.getElementById('modebar');
+  if(!bar){bar=document.createElement('div');bar.id='modebar';document.body.insertBefore(bar,document.body.firstChild.nextSibling);}
+  const cloud=window.CLOUD && window.CLOUD.connected();
+  if(!cloud){
+    bar.style.display='none';
+  } else {
+    bar.style.display='block';
+    bar.innerHTML = IS_ADMIN
+      ? '<span class="dot admin"></span> ADMIN — your changes go live to everyone. <button onclick="logoutAdmin()">Switch to viewer</button>'
+      : '<span class="dot live"></span> LIVE VIEW — updates automatically. <button onclick="askAdmin()">I\'m the organiser</button>';
+  }
+  // Lock inputs for viewers
+  document.body.classList.toggle('viewer', cloud && !IS_ADMIN);
+}
+function askAdmin(){
+  const code=prompt('Enter organiser code to edit:');
+  if(code===null)return;
+  if(code===ADMIN_CODE){ IS_ADMIN=true; try{localStorage.setItem('eskay_is_admin','1');}catch(e){} toast('Admin mode on'); applyMode(); rerender(); }
+  else toast('Wrong code');
+}
+function logoutAdmin(){ IS_ADMIN=false; try{localStorage.removeItem('eskay_is_admin');}catch(e){} toast('Now viewing'); applyMode(); rerender(); }
+
 (function init(){
   try{const raw=localStorage.getItem(LS_KEY);if(raw){const d=JSON.parse(raw);if(d&&d.teams)S=Object.assign(blank(),d);}}catch(e){}
   applyAccent();renderSwatches();renderTB();loadSetupInputs();
+
+  function startCloud(){
+    if(!(window.CLOUD && window.CLOUD.connected())){ applyMode(); return; }
+    CLOUD_READY=true;
+    window.CLOUD.subscribe((cloud)=>{
+      if(!cloud || !cloud.state) return;
+      // viewers always accept cloud; admin ignores echoes of own pushes by timestamp
+      if(IS_ADMIN) return; // admin is source of truth; don't overwrite own editing
+      S=Object.assign(blank(),cloud.state);
+      if(!S.filter)S.filter='all';
+      applyAccent();renderSwatches();renderTB();loadSetupInputs();rerender();
+    });
+    applyMode();
+  }
+  if(window.CLOUD) startCloud();
+  else window.addEventListener('cloud-ready',startCloud);
 })();
 </script>
 </body>
