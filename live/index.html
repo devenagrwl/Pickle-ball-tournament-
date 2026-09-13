@@ -45,13 +45,19 @@
   label.f .desc{font-size:11px;color:var(--muted);font-weight:400;display:block;margin-top:2px}
   input,select{background:var(--navy2);color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:15px;font-family:inherit;min-width:0}
   input[type=number]{width:72px;text-align:center;font-weight:700}
+  /* hide native number spinners — we use our own +/- buttons */
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  input[type=number]{-moz-appearance:textfield;appearance:textfield}
+  .step{min-width:150px}
+  .step button{flex:0 0 40px}
+  .step input{flex:1 1 auto;min-width:0}
   input[type=time]{width:120px}
   select{min-width:150px;max-width:190px}
   .title-input{width:100%;font-size:16px;font-weight:700;text-align:center;margin-bottom:4px}
   .step{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden}
   .step button{background:var(--panel2);color:var(--accent);border:none;width:40px;height:42px;font-size:22px;font-weight:700}
   .step button:active{background:var(--accent);color:var(--navy)}
-  .step input{border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:0;width:52px}
+  .step input{border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:0;width:66px;font-size:18px}
   .btn{display:block;width:100%;background:var(--accent);color:var(--navy);border:none;padding:15px;border-radius:12px;font-size:16px;font-weight:800;letter-spacing:.3px;margin-top:6px}
   .btn:active{opacity:.85}
   .btn.green{background:#2e6e56;color:#fff}
@@ -74,7 +80,7 @@
   .game.live{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
   .game .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
   .game .meta .t{color:var(--accent-l)}
-  .game .teams{display:grid;grid-template-columns:1fr 54px 14px 54px 1fr;align-items:center;gap:6px}
+  .game .teams{display:grid;grid-template-columns:1fr 56px 20px 56px 1fr;align-items:center;gap:8px;max-width:560px;margin:0 auto}
   .game .tname{font-size:14px;font-weight:600;line-height:1.25}
   .game .tname.right{text-align:right}
   .game .tname.win{color:var(--accent)}
@@ -91,7 +97,12 @@
   .po{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
   .po .lbl{color:var(--accent);font-weight:800;font-size:13px;margin-bottom:2px;letter-spacing:.3px}
   .po .note{color:var(--muted);font-size:11px;margin-bottom:8px}
-  .po .teams{display:grid;grid-template-columns:1fr 54px 14px 54px 1fr;align-items:center;gap:6px}
+  .po .teams{display:grid;grid-template-columns:1fr 56px 20px 56px 1fr;align-items:center;gap:8px;max-width:560px;margin:0 auto}
+  .po .tname{font-size:14px;font-weight:600;line-height:1.25}
+  .po .tname.right{text-align:right}
+  .po .tname.win{color:var(--accent)}
+  .po .sc{width:100%;padding:12px 4px;text-align:center;font-size:20px;font-weight:800}
+  .po .vs{text-align:center;color:var(--muted);font-size:12px}
   .champ{background:linear-gradient(135deg,var(--accent),var(--accent-l));color:var(--navy);border-radius:12px;padding:18px;text-align:center;margin-top:6px}
   .champ .k{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.8}
   .champ .v{font-size:22px;font-weight:900;margin-top:4px}
@@ -110,13 +121,29 @@
   .tb-item .mv{margin-left:auto;display:flex;gap:4px}
   .tb-item .mv button{background:var(--panel2);border:1px solid var(--line);color:var(--cream);width:30px;height:30px;border-radius:7px;font-size:14px}
   @media print{
-    header,nav,.savebar,.btn,.filters,.sub,#toast,.print-hide{display:none!important}
-    body{background:#fff;color:#000;padding:0}
-    .card,.game,.po{border:1px solid #999;background:#fff;color:#000;break-inside:avoid}
-    .game .sc{border:1px solid #999}
-    th{color:#000}.rankn{color:#000}.po .lbl{color:#000}
-    .champ{background:#eee;color:#000}
-    .view{display:block!important}
+    /* hide chrome + everything except the Share/print view */
+    header,nav,.savebar,#toast,.print-hide,#modebar{display:none!important}
+    .view{display:none!important}
+    #v-print{display:block!important}
+    #v-print > h2{display:none!important}
+    body{background:#fff!important;color:#111!important;padding:0;margin:0}
+    main{padding:0!important;max-width:100%!important}
+    /* force ALL text dark and backgrounds white/light for readability */
+    #v-print *{color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #v-print .card{border:1px solid #bbb!important;background:#fff!important;border-radius:8px;margin-bottom:12px;break-inside:avoid;box-shadow:none!important}
+    #v-print h2{color:#111!important;font-size:18px;border-bottom:2px solid #c8a24b;padding-bottom:6px}
+    #v-print table{width:100%;border-collapse:collapse}
+    #v-print th{color:#111!important;background:#f0ede4!important;border:1px solid #ccc!important;padding:7px 6px;font-size:11px;text-transform:uppercase}
+    #v-print td{border:1px solid #ddd!important;padding:7px 6px;color:#111!important}
+    #v-print .rankn{color:#8a6d2b!important;font-weight:800}
+    #v-print .pooltag{background:#e9e4d5!important;color:#5a4a1e!important;border:1px solid #cfc4a5;font-weight:700}
+    #v-print tr.qual td{background:#faf6e9!important}
+    /* champion + hero blocks: light gold bg, dark text */
+    #v-print .champ,#v-print .champ-hero,#v-print .myteam-card{background:#f6edd4!important;border:1px solid #d9c58a!important;border-radius:10px}
+    #v-print .champ *,#v-print .champ-hero *,#v-print .myteam-card *{color:#3a2f10!important}
+    /* header/title line */
+    #v-print .print-title{color:#111!important}
+    a[href]:after{content:""!important}
   }
 
   /* ===== live mode banner ===== */
@@ -178,6 +205,10 @@
   .runner .k{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
   .runner .v{font-size:15px;font-weight:700;margin-top:3px}
   .share-canvas-wrap{text-align:center;margin-top:8px}
+
+  /* pool-court assignment chips */
+  .pcchip{background:var(--navy2);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600}
+  .pcchip.on{background:var(--accent);color:var(--navy);border-color:var(--accent)}
 </style>
 
 <!-- Firebase live sync configured -->
@@ -275,6 +306,11 @@
         <div class="step"><button onclick="stepN('pools',-1)">–</button>
         <input type="number" id="i-pools" value="2" min="2" max="6" onchange="clampAll()">
         <button onclick="stepN('pools',1)">+</button></div></label>
+      <label class="f" id="row-poolorder" style="display:none"><span>Pool play order<span class="desc">how pools are scheduled</span></span>
+        <select id="i-poolorder">
+          <option value="interleaved">Interleaved (pools play in parallel)</option>
+          <option value="sequential">Sequential (finish Pool A, then Pool B…)</option>
+        </select></label>
       <label class="f"><span>Meetings<span class="desc">how many times each pair plays</span></span>
         <select id="i-legs" onchange="clampAll()">
           <option value="1">Once (single)</option>
@@ -300,8 +336,13 @@
       <h3>Courts &amp; timing</h3>
       <label class="f"><span>Courts available</span>
         <div class="step"><button onclick="stepN('courts',-1)">–</button>
-        <input type="number" id="i-courts" value="3" min="1" max="10">
+        <input type="number" id="i-courts" value="3" min="1" max="10" onchange="onCourts()">
         <button onclick="stepN('courts',1)">+</button></div></label>
+      <label class="f" style="display:block"><span>Court names<span class="desc">comma-separated; leave blank for Court 1,2,3…</span></span>
+        <input type="text" id="i-courtnames" placeholder="e.g. Court 2, Court 4, Court 6" style="width:100%;margin-top:8px" oninput="onCourts()"></label>
+      <label class="f"><span>Lock pools to courts<span class="desc">assign each pool its own court(s)</span></span>
+        <select id="i-lockcourts" onchange="onCourts()"><option value="0">No (pools share courts)</option><option value="1">Yes</option></select></label>
+      <div id="poolcourt-assign" style="display:none"></div>
       <label class="f"><span>Start time</span><input type="time" id="i-start" value="18:00"></label>
       <label class="f"><span>Minutes per game</span>
         <div class="step"><button onclick="stepN('dur',-1)">–</button>
@@ -431,7 +472,76 @@ function clampAll(){
     (fmt==='pools'?`Split into ${$('#i-pools').value} pools.`:'Everyone plays everyone.');
 }
 function poolGameCount(t,p){let g=0;for(let i=0;i<p;i++){const c=Math.floor((t-i+p-1)/p);g+=c*(c-1)/2;}return g;}
-function onFormat(){const p=$('#i-format').value==='pools';$('#row-pools').style.display=p?'':'none';clampAll();}
+function onFormat(){const p=$('#i-format').value==='pools';$('#row-pools').style.display=p?'':'none';document.getElementById('row-poolorder').style.display=p?'':'none';onCourts();clampAll();}
+function courtNamesList(){
+  const n=+$('#i-courts').value;
+  const raw=($('#i-courtnames')?$('#i-courtnames').value:'').trim();
+  let names=raw?raw.split(',').map(s=>s.trim()).filter(Boolean):[];
+  const out=[];
+  for(let i=0;i<n;i++){ out.push(names[i] || ('Court '+(i+1))); }
+  return out; // length === number of courts
+}
+function onCourts(){
+  const isPools=$('#i-format').value==='pools';
+  const lock=$('#i-lockcourts').value==='1';
+  const box=document.getElementById('poolcourt-assign');
+  // only show assignment when pools + lock
+  if(!(isPools && lock)){ box.style.display='none'; box.innerHTML=''; return; }
+  const pools=+$('#i-pools').value;
+  const courts=courtNamesList();
+  box.style.display='block';
+  box.innerHTML='<div style="font-size:12px;color:var(--muted);margin:8px 0 4px">Pick which court(s) each pool uses. A pool can have more than one — tap to toggle.</div>';
+  for(let p=1;p<=pools;p++){
+    const row=document.createElement('div');
+    row.style.cssText='padding:8px 0;border-bottom:1px solid var(--line)';
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:13px;font-weight:700;margin-bottom:6px';
+    lbl.textContent='Pool '+p;
+    row.appendChild(lbl);
+    const chips=document.createElement('div');
+    chips.style.cssText='display:flex;flex-wrap:wrap;gap:6px';
+    courts.forEach((cn,ci)=>{
+      const chip=document.createElement('button');
+      chip.type='button';
+      chip.dataset.pool=p; chip.dataset.court=ci;
+      const sel = (window._poolCourtSel && window._poolCourtSel[p] && window._poolCourtSel[p].includes(ci));
+      chip.className='pcchip'+(sel?' on':'');
+      chip.textContent=cn;
+      chip.onclick=()=>{ togglePoolCourt(p,ci); };
+      chips.appendChild(chip);
+    });
+    row.appendChild(chips);
+    box.appendChild(row);
+  }
+  // default: if nothing selected yet, auto-assign one court per pool round-robin
+  ensureDefaultPoolCourts(pools,courts.length);
+}
+function ensureDefaultPoolCourts(pools,courtCount){
+  if(!window._poolCourtSel) window._poolCourtSel={};
+  let changed=false;
+  for(let p=1;p<=pools;p++){
+    if(!window._poolCourtSel[p] || !window._poolCourtSel[p].length){
+      window._poolCourtSel[p]=[ (p-1)%courtCount ]; changed=true;
+    }
+  }
+  if(changed) refreshChipStates();
+}
+function togglePoolCourt(p,ci){
+  if(!window._poolCourtSel) window._poolCourtSel={};
+  if(!window._poolCourtSel[p]) window._poolCourtSel[p]=[];
+  const arr=window._poolCourtSel[p];
+  const idx=arr.indexOf(ci);
+  if(idx>=0){ if(arr.length>1) arr.splice(idx,1); } // keep at least 1
+  else arr.push(ci);
+  refreshChipStates();
+}
+function refreshChipStates(){
+  document.querySelectorAll('.pcchip').forEach(chip=>{
+    const p=+chip.dataset.pool, ci=+chip.dataset.court;
+    const on = window._poolCourtSel && window._poolCourtSel[p] && window._poolCourtSel[p].includes(ci);
+    chip.className='pcchip'+(on?' on':'');
+  });
+}
 function onTitle(){S.title=$('#i-title').value;S.subtitle=$('#i-subtitle').value;$('#hdr-title').textContent=S.title||'Tournament';$('#hdr-sub').textContent=S.subtitle||'';save();}
 
 function renderSwatches(){
@@ -499,28 +609,69 @@ function generate(){
   const teams=[];
   for(let i=0;i<t;i++) teams.push({id:i,p1:old[i]?.p1||'',p2:old[i]?.p2||'',pool:(i%pools)+1});
 
-  const allPairs=[];
+  const poolOrder = ($('#i-poolorder') ? $('#i-poolorder').value : 'interleaved');
+  const courtNames = courtNamesList(); // array length = courts
+  const lockCourts = ($('#i-lockcourts') && $('#i-lockcourts').value==='1' && fmt==='pools');
+  const poolCourtSel = (window._poolCourtSel||{}); // {poolNo:[courtIdx,...]}
+  // build pair list per pool
+  const pairsByPool=[];
   for(let pl=1;pl<=pools;pl++){
     const members=teams.filter(x=>x.pool===pl).map(x=>x.id);
+    const list=[];
     for(let leg=0;leg<legs;leg++){
       circleRR(members).forEach(pairs=>{
-        (leg%2?pairs.map(([a,b])=>[b,a]):pairs).forEach(pr=>allPairs.push({pool:pl,pr}));
+        (leg%2?pairs.map(([a,b])=>[b,a]):pairs).forEach(pr=>list.push({pool:pl,pr}));
       });
     }
+    pairsByPool.push(list);
   }
-  const games=[]; let gid=0, slot=0, court=1, used=new Set();
-  allPairs.forEach(item=>{
-    const [a,b]=item.pr;
-    if(court>courts||used.has(a)||used.has(b)){slot++;court=1;used=new Set();}
-    games.push({id:gid++,pool:item.pool,slot,court,a,b,sa:'',sb:''});
-    used.add(a);used.add(b);court++;
-  });
+  const games=[]; let gid=0;
 
-  S.config={t,fmt,pools,legs,courts,points,ppoints,deuce,po,adv,third,start,dur};
+  if(lockCourts){
+    // Each pool scheduled ONLY on its assigned court(s), independently, on its own time slots.
+    // We give every pool its own slot timeline starting at slot 0 so pools run in parallel on their courts.
+    for(let pl=1;pl<=pools;pl++){
+      const myCourts = (poolCourtSel[pl] && poolCourtSel[pl].length)? poolCourtSel[pl].slice() : [ (pl-1)%courts ];
+      const list=pairsByPool[pl-1];
+      let slot=0, ci=0, used=new Set();
+      list.forEach(item=>{
+        const [a,b]=item.pr;
+        // move to next court in this pool's set; new slot when we've used all its courts or a team repeats
+        if(ci>=myCourts.length || used.has(a) || used.has(b)){ slot++; ci=0; used=new Set(); }
+        games.push({id:gid++,pool:pl,slot,court:myCourts[ci],a,b,sa:'',sb:''});
+        used.add(a);used.add(b);ci++;
+      });
+    }
+  } else {
+    // shared courts (original behaviour): court index 0..courts-1
+    let slot=0, court=0, used=new Set();
+    function place(item){
+      const [a,b]=item.pr;
+      if(court>=courts||used.has(a)||used.has(b)){slot++;court=0;used=new Set();}
+      games.push({id:gid++,pool:item.pool,slot,court,a,b,sa:'',sb:''});
+      used.add(a);used.add(b);court++;
+    }
+    if(pools>1 && poolOrder==='sequential'){
+      pairsByPool.forEach((list,idx)=>{
+        if(idx>0){ slot++; court=0; used=new Set(); }
+        list.forEach(place);
+      });
+    } else {
+      const maxLen=Math.max(0,...pairsByPool.map(l=>l.length));
+      const flat=[];
+      for(let i=0;i<maxLen;i++){ for(let p=0;p<pairsByPool.length;p++){ if(pairsByPool[p][i]) flat.push(pairsByPool[p][i]); } }
+      flat.forEach(place);
+    }
+  }
+
+  const courtNamesRaw = ($('#i-courtnames')?$('#i-courtnames').value:'');
+  const poolCourtSaved = JSON.parse(JSON.stringify(poolCourtSel));
+  S.config={t,fmt,pools,legs,courts,points,ppoints,deuce,po,adv,third,start,dur,poolOrder,courtNames,courtNamesRaw,lockCourts,poolCourtSel:poolCourtSaved};
   S.teams=teams;S.games=games;S.filter='all';
   buildPlayoffs();save();toast('Tournament generated');goto('schedule');
 }
 
+function courtLabel(idx){const names=(S.config&&S.config.courtNames)||[];return names[idx]||('Court '+((idx||0)+1));}
 function tname(id){const t=S.teams[id];if(!t)return '';const tag='T'+(id+1);if(!t.p1&&!t.p2)return tag;return tag+' — '+[t.p1,t.p2].filter(Boolean).join(' & ');}
 
 function renderRoster(){
@@ -559,7 +710,7 @@ function renderNow(){
     nowGames.forEach(g=>{
       const row=el('div','court-now');
       const scoreStr=(g.sa!==''&&g.sb!=='')?`${g.sa}–${g.sb}`:'vs';
-      row.innerHTML=`<div class="cbadge">Court ${g.court}</div>
+      row.innerHTML=`<div class="cbadge">${courtLabel(g.court)}</div>
         <div class="cmatch">${esc(tname(g.a))}<br><span style="color:var(--muted);font-size:11px">${time}</span></div>
         <div class="cscore">${scoreStr}</div>
         <div class="cmatch" style="text-align:right">${esc(tname(g.b))}</div>`;
@@ -642,9 +793,22 @@ function renderSchedule(){
     for(let p=1;p<=S.config.pools;p++)f.appendChild(mk('P'+p,'Pool '+p));
     box.appendChild(f);
   }
+  // sort control
+  const sortRow=el('div','filters');
+  const sorts=[['time','By time'],['court','By court'],['pool','By pool'],['status','Unplayed first']];
+  sorts.forEach(([k,lab])=>{const b=el('button',(S.schedSort||'time')===k?'active':'',lab);b.onclick=()=>{S.schedSort=k;renderSchedule();};sortRow.appendChild(b);});
+  box.appendChild(sortRow);
   const open=S.games.filter(g=>g.sa===''||g.sb==='').map(g=>g.slot);
   const firstOpen=open.length?Math.min(...open):-1;
-  S.games.forEach(g=>{
+  // build a sorted view (does not mutate S.games order / ids)
+  const sortKey=S.schedSort||'time';
+  const view=S.games.slice().sort((a,b)=>{
+    if(sortKey==='court') return a.court-b.court || a.slot-b.slot;
+    if(sortKey==='pool') return a.pool-b.pool || a.slot-b.slot || a.court-b.court;
+    if(sortKey==='status'){const ad=(a.sa!==''&&a.sb!=='')?1:0, bd=(b.sa!==''&&b.sb!=='')?1:0; return ad-bd || a.slot-b.slot || a.court-b.court;}
+    return a.slot-b.slot || a.court-b.court; // time (default)
+  });
+  view.forEach(g=>{
     if(S.filter!=='all'&&'P'+g.pool!==S.filter)return;
     const isdone=g.sa!==''&&g.sb!=='';
     const aw=isdone&&+g.sa>+g.sb, bw=isdone&&+g.sb>+g.sa;
@@ -652,7 +816,7 @@ function renderSchedule(){
     const card=el('div','game'+(isdone?' done':'')+(live?' live':''));
     const poolLbl=S.config.pools>1?`Pool ${g.pool} · `:'';
     const time=slotTime(S.config.start,g.slot,S.config.dur);
-    card.innerHTML=`<div class="meta"><span>#${g.id+1} · ${poolLbl}<span class="t">${time}</span></span><span>Court ${g.court}${live?' · UP NEXT':''}</span></div>`;
+    card.innerHTML=`<div class="meta"><span>#${g.id+1} · ${poolLbl}<span class="t">${time}</span></span><span>${courtLabel(g.court)}${live?' · UP NEXT':''}</span></div>`;
     const teams=el('div','teams');
     const na=el('div','tname'+(aw?' win':''),esc(tname(g.a)));
     const nb=el('div','tname right'+(bw?' win':''),esc(tname(g.b)));
@@ -699,13 +863,30 @@ function cmp(a,b){
 }
 function sortStand(arr){return arr.slice().sort(cmp);}
 
+function standSort(rows){
+  const k=S.standSort||'rank';
+  if(k==='rank') return sortStand(rows);
+  const r=rows.slice();
+  if(k==='pf') r.sort((a,b)=>b.pf-a.pf||a.id-b.id);
+  else if(k==='diff') r.sort((a,b)=>b.diff-a.diff||a.id-b.id);
+  else if(k==='wins') r.sort((a,b)=>b.w-a.w||a.id-b.id);
+  else if(k==='name') r.sort((a,b)=>tname(a.id).localeCompare(tname(b.id)));
+  else return sortStand(rows);
+  return r;
+}
 function renderStandings(){
   const box=$('#stand-body');box.innerHTML='';
   if(!S.teams.length){box.innerHTML='<p class="empty">No standings yet.</p>';return;}
   const st=computeStats();
+  // sort control
+  const sortRow=el('div','filters');
+  [['rank','By rank'],['wins','By wins'],['diff','By differential'],['pf','By points'],['name','A–Z']].forEach(([k,lab])=>{
+    const b=el('button',(S.standSort||'rank')===k?'active':'',lab);b.onclick=()=>{S.standSort=k;renderStandings();};sortRow.appendChild(b);
+  });
+  box.appendChild(sortRow);
   const groups=[];
-  if(S.config.pools>1){for(let p=1;p<=S.config.pools;p++)groups.push({label:'Pool '+p,rows:sortStand(st.filter(s=>s.pool===p))});}
-  else groups.push({label:null,rows:sortStand(st)});
+  if(S.config.pools>1){for(let p=1;p<=S.config.pools;p++)groups.push({label:'Pool '+p,rows:standSort(st.filter(s=>s.pool===p))});}
+  else groups.push({label:null,rows:standSort(st)});
   groups.forEach(gr=>{
     const card=el('div','card');
     if(gr.label)card.appendChild(el('div','pooltag',gr.label));
@@ -713,7 +894,7 @@ function renderStandings(){
     tbl.innerHTML='<thead><tr><th>#</th><th style="text-align:left">Team</th><th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>±</th></tr></thead>';
     const tb=el('tbody');
     gr.rows.forEach((s,idx)=>{
-      const qual=(S.config.po!=='none')&&(idx<advCount(gr.label));
+      const qual=(S.config.po!=='none')&&((S.standSort||'rank')==='rank')&&(idx<advCount(gr.label));
       const tr=el('tr',qual?'qual':'');
       tr.innerHTML=`<td class="rankn">${idx+1}</td><td class="tm">${esc(tname(s.id))}</td>
         <td>${s.pld}</td><td>${s.w}</td><td>${s.l}</td><td>${s.pf}</td><td>${s.pa}</td><td>${s.diff>0?'+':''}${s.diff}</td>`;
@@ -937,21 +1118,77 @@ function wrapText(ctx,text,cx,cy,maxW,lh){
 function renderPrint(){
   const box=$('#print-body');box.innerHTML='';
   if(!S.teams.length){box.innerHTML='<p class="empty">Nothing to show yet.</p>';return;}
+  // Title header
   const head=el('div','card');
-  head.innerHTML=`<div style="text-align:center"><div style="font-size:18px;font-weight:800;color:var(--accent)">${esc(S.title)}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${esc(S.subtitle)}</div></div>`;
+  head.innerHTML=`<div style="text-align:center"><div class="print-title" style="font-size:20px;font-weight:800;color:var(--accent)">${esc(S.title)}</div><div style="font-size:13px;color:var(--muted);margin-top:3px">${esc(S.subtitle)}</div></div>`;
   box.appendChild(head);
+
+  // TEAMS roster
+  {
+    const c=el('div','card');c.appendChild(el('div','pooltag','Teams'));
+    const tbl=el('table');
+    const showPool=S.config.pools>1;
+    tbl.innerHTML='<thead><tr><th>#</th><th style="text-align:left">Team</th>'+(showPool?'<th>Pool</th>':'')+'</tr></thead>';
+    const tb=el('tbody');
+    S.teams.forEach((t,i)=>{tb.appendChild(el('tr',null,`<td class="rankn">T${i+1}</td><td class="tm">${esc(tname(i))}</td>`+(showPool?`<td>${t.pool}</td>`:'')));});
+    tbl.appendChild(tb);c.appendChild(tbl);box.appendChild(c);
+  }
+
+  // FULL SCHEDULE
+  {
+    const c=el('div','card');c.appendChild(el('div','pooltag','League schedule'));
+    const tbl=el('table');
+    const showPool=S.config.pools>1;
+    tbl.innerHTML='<thead><tr><th>#</th><th>Time</th><th>Court</th>'+(showPool?'<th>Pool</th>':'')+'<th style="text-align:left">Match</th><th>Score</th></tr></thead>';
+    const tb=el('tbody');
+    const view=S.games.slice().sort((a,b)=>a.slot-b.slot||a.court-b.court);
+    view.forEach(g=>{
+      const time=slotTime(S.config.start,g.slot,S.config.dur);
+      const score=(g.sa!==''&&g.sb!=='')?`${g.sa} – ${g.sb}`:'—';
+      const match=`${esc(tname(g.a))}  vs  ${esc(tname(g.b))}`;
+      tb.appendChild(el('tr',null,`<td class="rankn">${g.id+1}</td><td>${time}</td><td>${esc(courtLabel(g.court))}</td>`+(showPool?`<td>${g.pool}</td>`:'')+`<td class="tm">${match}</td><td>${score}</td>`));
+    });
+    tbl.appendChild(tb);c.appendChild(tbl);box.appendChild(c);
+  }
+
+  // Standings (per pool if pools)
   const st=computeStats();
   const groups=[];
-  if(S.config.pools>1){for(let p=1;p<=S.config.pools;p++)groups.push({label:'Pool '+p,rows:sortStand(st.filter(s=>s.pool===p))});}
+  if(S.config.pools>1){for(let p=1;p<=S.config.pools;p++)groups.push({label:'Pool '+p+' — Standings',rows:sortStand(st.filter(s=>s.pool===p))});}
   else groups.push({label:'Standings',rows:sortStand(st)});
   groups.forEach(gr=>{
     const c=el('div','card');c.appendChild(el('div','pooltag',gr.label));
     const tbl=el('table');
-    tbl.innerHTML='<thead><tr><th>#</th><th style="text-align:left">Team</th><th>P</th><th>W</th><th>L</th><th>±</th></tr></thead>';
+    tbl.innerHTML='<thead><tr><th>#</th><th style="text-align:left">Team</th><th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>±</th></tr></thead>';
     const tb=el('tbody');
-    gr.rows.forEach((s,i)=>{tb.appendChild(el('tr',null,`<td class="rankn">${i+1}</td><td class="tm">${esc(tname(s.id))}</td><td>${s.pld}</td><td>${s.w}</td><td>${s.l}</td><td>${s.diff>0?'+':''}${s.diff}</td>`));});
+    gr.rows.forEach((s,i)=>{tb.appendChild(el('tr',null,`<td class="rankn">${i+1}</td><td class="tm">${esc(tname(s.id))}</td><td>${s.pld}</td><td>${s.w}</td><td>${s.l}</td><td>${s.pf}</td><td>${s.pa}</td><td>${s.diff>0?'+':''}${s.diff}</td>`));});
     tbl.appendChild(tb);c.appendChild(tbl);box.appendChild(c);
   });
+  // Playoff results (if any exist and have scores)
+  if(S.playoffs && S.playoffs.length){
+    const anyPO=S.playoffs.some(m=>m.sa!==''&&m.sb!=='');
+    if(anyPO){
+      const c=el('div','card');c.appendChild(el('div','pooltag','Playoff results'));
+      const tbl=el('table');
+      tbl.innerHTML='<thead><tr><th style="text-align:left">Match</th><th style="text-align:left">Result</th></tr></thead>';
+      const tb=el('tbody');
+      const sd=seeds();
+      S.playoffs.forEach(m=>{
+        const aId=resolveSlot(m.a,sd),bId=resolveSlot(m.b,sd);
+        const an=aId==null?'TBD':tname(aId), bn=bId==null?'TBD':tname(bId);
+        const res=(m.sa!==''&&m.sb!=='')?`${esc(an)} ${m.sa}–${m.sb} ${esc(bn)}`:`${esc(an)} vs ${esc(bn)}`;
+        tb.appendChild(el('tr',null,`<td class="tm">${esc(m.label)}</td><td class="tm">${res}</td>`));
+      });
+      tbl.appendChild(tb);c.appendChild(tbl);box.appendChild(c);
+    }
+  }
+  // Champion banner
+  const champ = (typeof matchWinner==='function')?matchWinner('FN'):null;
+  if(champ!=null){
+    const c=el('div','card champ');
+    c.innerHTML=`<div style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase">Champion</div><div style="font-size:22px;font-weight:900;margin-top:4px">${esc(tname(champ))}</div></div>`;
+    box.appendChild(c);
+  }
 }
 function copyText(){
   let x=`🏓 ${S.title}\n${S.subtitle}\n\n`;
@@ -996,9 +1233,9 @@ function loadSetupInputs(){
     $('#i-teams').value=c.t;$('#i-format').value=c.fmt;$('#i-pools').value=c.pools;
     $('#i-legs').value=c.legs||1;$('#i-courts').value=c.courts;$('#i-points').value=c.points;
     $('#i-ppoints').value=c.ppoints||c.points;$('#i-deuce').value=c.deuce??1;$('#i-po').value=c.po;
-    $('#i-adv').value=c.adv;$('#i-third').value=c.third||0;$('#i-start').value=c.start||'18:00';$('#i-dur').value=c.dur||12;
+    $('#i-adv').value=c.adv;$('#i-third').value=c.third||0;if($('#i-poolorder'))$('#i-poolorder').value=c.poolOrder||'interleaved';$('#i-start').value=c.start||'18:00';$('#i-dur').value=c.dur||12;if($('#i-courtnames'))$('#i-courtnames').value=c.courtNamesRaw||'';if($('#i-lockcourts'))$('#i-lockcourts').value=c.lockCourts?'1':'0';if(c.poolCourtSel)window._poolCourtSel=JSON.parse(JSON.stringify(c.poolCourtSel));
   }
-  onFormat();clampAll();
+  onFormat();onCourts();clampAll();
 }
 
 function currentView(){const a=document.querySelector('.view.active');return a?a.id.replace('v-',''):'setup';}
