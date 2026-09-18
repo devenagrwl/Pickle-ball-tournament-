@@ -764,6 +764,35 @@ function renderPrint(){
   head.innerHTML=`<div style="text-align:center"><div class="print-title" style="font-size:20px;font-weight:800;color:var(--accent)">${esc(S.title)}</div><div style="font-size:13px;color:var(--muted);margin-top:3px">${esc(S.subtitle)}</div></div>`;
   box.appendChild(head);
 
+  // ===== RULES & FORMAT (first page) =====
+  {
+    const c=S.config;
+    const fmtTxt = c.pools>1
+      ? `Pools format — ${c.pools} pools, round-robin within each pool. Top ${c.adv} of each pool advance.`
+      : (c.legs>1 ? 'Double round-robin — every team plays every other team twice.' : 'Round-robin — every team plays every other team once.');
+    const poTxt = {ipl:'IPL-style Top 4 — Qualifier 1, Eliminator, Qualifier 2, Grand Final.',semis:'Top 4 — Semifinals (1v4, 2v3), then Grand Final.',final:'Top 2 — Grand Final only.',none:'League only — no playoffs.'}[c.po]||'';
+    const courtsTxt = (c.courtNames&&c.courtNames.length)? c.courtNames.join(', ') : (c.courts+' courts');
+    const lockTxt = c.lockCourts ? ' Pools are locked to specific courts.' : '';
+    const tbTxt = (S.tiebreak||[]).map(k=>({h2h:'Head-to-head',diff:'Point differential',pf:'Points scored',pld:'Fewer games played',wins:'Wins'}[k])).filter(Boolean).join(' → ');
+    const rules = [
+      ['Format', fmtTxt + lockTxt],
+      ['Teams', `${c.t} teams, 2 players each (doubles).`],
+      ['Scoring', `League games to ${c.points} points. Playoff games to ${c.ppoints} points${c.deuce?', deuce ON (win by 2)':' (no deuce)'}.`],
+      ['Playoffs', poTxt],
+      ['Courts', courtsTxt + '.'],
+      ['Timing', `Start ${slotTime(c.start,0,c.dur)}, about ${c.dur} minutes per game.`],
+      ['Standings order', `Wins, then: ${tbTxt}.`],
+      ['Punctuality', 'Be on court at your scheduled time. Latecomers may forfeit at the organiser\'s discretion.'],
+    ];
+    const c1=el('div','card');
+    c1.appendChild(el('div','pooltag','Rules & format'));
+    const tbl=el('table');
+    const tb=el('tbody');
+    rules.forEach(([k,v])=>{ if(v) tb.appendChild(el('tr',null,`<td class="tm" style="width:130px;font-weight:800;vertical-align:top">${esc(k)}</td><td class="tm">${esc(v)}</td>`)); });
+    tbl.appendChild(tb); c1.appendChild(tbl); c1.style.pageBreakAfter='always';
+    box.appendChild(c1);
+  }
+
   // TEAMS roster
   {
     const c=el('div','card');c.appendChild(el('div','pooltag','Teams'));
